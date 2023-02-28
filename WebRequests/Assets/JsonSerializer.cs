@@ -7,7 +7,7 @@ using TMPro;
 
 public class JsonSerializer : MonoBehaviour
 {
-    public TMP_InputField playerName, level, Time;
+    public TMP_InputField screenName, firstName, lastName, score;
     public DataClass dataObj;
     public DataClass newDataObj;
     public string filePath;
@@ -16,28 +16,29 @@ public class JsonSerializer : MonoBehaviour
     void Start()
     {
         filePath = Path.Combine(Application.dataPath, "saveData.txt");
-        dataObj = new DataClass();
-        dataObj.level = 1;
-        dataObj.timeElapsed = 4543.928456f;
-        dataObj.name = "Jake";
-        string json = JsonUtility.ToJson(dataObj);
-        Debug.Log(json);
-        File.WriteAllText(filePath, json);
 
-        StartCoroutine(SendWebData(json));
-        StartCoroutine(GetRequest("http://localhost:3000/SendUnityData"));
+        //dataObj = new DataClass();
+        //dataObj.level = 1;
+        //dataObj.timeElapsed = 4543.928456f;
+        //dataObj.name = "Jake";
+        //string json = JsonUtility.ToJson(dataObj);
+        //Debug.Log(json);
+        //File.WriteAllText(filePath, json);
 
-        newDataObj = JsonUtility.FromJson<DataClass>(json);
-        Debug.Log(newDataObj.name);        
+        //StartCoroutine(SendWebData(json));
+        //StartCoroutine(GetRequest("http://localhost:3000/SendUnityData"));
+
+        //newDataObj = JsonUtility.FromJson<DataClass>(json);
+        //Debug.Log(newDataObj.name);        
     }
 
-    IEnumerator SendWebData(string jason)
+    IEnumerator SendWebData(string json)
     {
-        using (UnityWebRequest request = UnityWebRequest.Post("http://localhost:3000/unity", jason))
+        using (UnityWebRequest request = UnityWebRequest.Post("http://localhost:3000/newUnitySave", json))
         {
             request.SetRequestHeader("content-type", "application/json");
             request.uploadHandler.contentType = "application/json";
-            request.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(jason));
+            request.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(json));
 
             yield return request.SendWebRequest();
 
@@ -52,31 +53,24 @@ public class JsonSerializer : MonoBehaviour
         }
     }
 
-    IEnumerator GetRequest(string uri)
-    {
-        using(UnityWebRequest getRequest = UnityWebRequest.Get(uri))
-        {
-            yield return getRequest.SendWebRequest();
-
-            var newData = System.Text.Encoding.UTF8.GetString(getRequest.downloadHandler.data);
-            var newGetRequestData = JsonUtility.FromJson<DataClass>(newData);
-
-            Debug.Log(newGetRequestData.name);
-            Debug.Log(newGetRequestData.level);
-            Debug.Log(newGetRequestData.timeElapsed);
-        }
-    }
-
     public void SendButton()
     {
-        var levelData = int.Parse(level.text);
-        var timeData = float.Parse(Time.text);
+        var scoreData = int.Parse(score.text);
+        score.text = "";
 
-        DataClass formData = new DataClass();
+        NewDataClass formData = new NewDataClass();
 
-        formData.name = playerName.text;
-        formData.level = levelData;
-        formData.timeElapsed = timeData;
+        formData.screenName = screenName.text;
+        screenName.text = "";
+
+        formData.firstName = firstName.text;
+        firstName.text = "";
+
+        formData.lastName = lastName.text;
+        lastName.text = "";
+
+        formData.dateJoined = System.DateTime.Now.ToString();
+        formData.score = scoreData;
 
         string json = JsonUtility.ToJson(formData);
 
